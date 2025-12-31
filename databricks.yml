@@ -1,0 +1,56 @@
+bundle:
+  name: mlops-dev-bundle
+
+targets:
+  dev:
+    workspace:
+      host: https://dbc-292b7b7a-2dd0.cloud.databricks.com
+
+resources:
+  jobs:
+    mlops_dev_pipeline:
+      name: mlops-dev-pipeline
+
+      tasks:
+        - task_key: data_ingestion
+          notebook_task:
+            notebook_path: notebooks/01_data_ingestion.py
+            base_parameters:
+              env: dev
+          compute: serverless
+
+        - task_key: data_validation
+          depends_on:
+            - task_key: data_ingestion
+          notebook_task:
+            notebook_path: notebooks/00_data_validation.py
+            base_parameters:
+              env: dev
+          compute: serverless
+
+        - task_key: train_model
+          depends_on:
+            - task_key: data_validation
+          notebook_task:
+            notebook_path: notebooks/02_train_model.py
+            base_parameters:
+              env: dev
+          compute: serverless
+
+        - task_key: evaluate_model
+          depends_on:
+            - task_key: train_model
+          notebook_task:
+            notebook_path: notebooks/03_evaluate_model.py
+            base_parameters:
+              env: dev
+          compute: serverless
+
+        - task_key: register_model
+          depends_on:
+            - task_key: evaluate_model
+          notebook_task:
+            notebook_path: notebooks/04_model_register.py
+            base_parameters:
+              env: dev
+          compute: serverless
