@@ -1,0 +1,29 @@
+bundle:
+  name: mlops-stag-bundle
+
+targets:
+  stag:
+    workspace:
+      host: https://dbc-292b7b7a-2dd0.cloud.databricks.com
+
+resources:
+  jobs:
+    mlops_stag_pipeline:
+      name: mlops-stag-pipeline
+
+      tasks:
+        - task_key: model_evaluation
+          notebook_task:
+            notebook_path: notebooks/05_evaluate_model.py
+            base_parameters:
+              env: stag
+          compute: serverless
+
+        # - task_key: data_validation
+        #   depends_on:
+        #     - task_key: data_ingestion
+        #   notebook_task:
+        #     notebook_path: notebooks/00_data_validation.py
+        #     base_parameters:
+        #       env: dev
+        #   compute: serverless
