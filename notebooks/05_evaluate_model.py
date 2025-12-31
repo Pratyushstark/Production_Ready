@@ -115,7 +115,9 @@ else:
     client.set_model_version_tag(
             name = latest.name,
             version = latest.version,
-            tags = TAGS
+            # tags = TAGS
+            key = "promoted_by",
+            value = "stag_pipeline"
         )
 
 print("Staging evaluation passed")
