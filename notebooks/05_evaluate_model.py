@@ -81,61 +81,65 @@ print(f"STAGING evaluation accuracy: {f1_score}")
 
 # Hard gate
 # ----------------------------
-if f1_score < MIN_ACCURACY:
-    # raise RuntimeError(
-    #     f"Model failed staging gate. "
-    #     f"Accuracy {f1_score:.4f} < {MIN_ACCURACY}"
-    # )
-    print(f"current f1 score is:{f1_score}. Discarding the current dev model")
-else:
-    print("If current f1 score is better than the current staging model f1 score.")
-    # ----------------------------
-    # Transition to STAGING
-    # ----------------------------
-    client.set_registered_model_alias(
-        name = MODEL_NAME,
-        alias = "staging",
-        version = latest.version
-    )
+# if f1_score < MIN_ACCURACY:
+#     # raise RuntimeError(
+#     #     f"Model failed staging gate. "
+#     #     f"Accuracy {f1_score:.4f} < {MIN_ACCURACY}"
+#     # )
+#     print(f"current f1 score is:{f1_score}. Discarding the current dev model")
+# else:
+#     print("If current f1 score is better than the current staging model f1 score.")
+#     # ----------------------------
+#     # Transition to STAGING
+#     # ----------------------------
+#     client.set_registered_model_alias(
+#         name = MODEL_NAME,
+#         alias = "staging",
+#         version = latest.version
+#     )
 
-    print(f"✅ Alias 'latest-model' set to version {latest.version}")
+#     print(f"✅ Alias 'latest-model' set to version {latest.version}")
 
-    # ----------------------------
-    # Setting F1 Score as a tag
-    # ----------------------------
-    # Provide more details on this specific model version
-    best_score = f1_score
+#     # ----------------------------
+#     # Setting F1 Score as a tag
+#     # ----------------------------
+#     # Provide more details on this specific model version
+#     best_score = f1_score
 
-    # We can also tag the model version with the F1 score for visibility. This will add f1 score as a tag
-    # TAGS = {
-    #     "promoted_by": "stag_pipeline",
-    #     "f1_score": f"{round(best_score,4)}"
-    # }
+#     # We can also tag the model version with the F1 score for visibility. This will add f1 score as a tag
+#     # TAGS = {
+#     #     "promoted_by": "stag_pipeline",
+#     #     "f1_score": f"{round(best_score,4)}"
+#     # }
 
-    # client.set_model_version_tag(
-    #         name = latest.name,
-    #         version = latest.version,
-    #         # tags = TAGS
-    #         key = "promoted_by",
-    #         value = "stag_pipeline"
-    #     )
+#     # client.set_model_version_tag(
+#     #         name = latest.name,
+#     #         version = latest.version,
+#     #         # tags = TAGS
+#     #         key = "promoted_by",
+#     #         value = "stag_pipeline"
+#     #     )
 
-    TAGS = {
-    "promoted_by": "stag_pipeline",
-    "f1_score": f"{round(best_score, 4)}"
-}
+#     TAGS = {
+#     "promoted_by": "stag_pipeline",
+#     "f1_score": f"{round(best_score, 4)}"
+# }
 
-    for key, value in TAGS.items():
-        client.set_model_version_tag(
-            name=latest.name,
-            version=latest.version,
-            key=key,
-            value=value
-        )
+#     for key, value in TAGS.items():
+#         client.set_model_version_tag(
+#             name=latest.name,
+#             version=latest.version,
+#             key=key,
+#             value=value
+#         )
 
 
-print("Staging evaluation passed")
-dbutils.jobs.taskValues.set(key="f1_score",value=f1_score)
+# print("Staging evaluation passed")
+dbutils.jobs.taskValues.set(
+    key="results",
+    value={"f1_score":f1_score,
+           "model_uri":model_uri,
+           "model_version":latest.version})
 
 # # Promote to Staging
 # client.transition_model_version_stage(
