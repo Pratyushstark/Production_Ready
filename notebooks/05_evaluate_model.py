@@ -107,18 +107,32 @@ else:
     best_score = f1_score
 
     # We can also tag the model version with the F1 score for visibility. This will add f1 score as a tag
-    TAGS = {
-        "promoted_by": "stag_pipeline",
-        "f1_score": f"{round(best_score,4)}"
-    }
+    # TAGS = {
+    #     "promoted_by": "stag_pipeline",
+    #     "f1_score": f"{round(best_score,4)}"
+    # }
 
-    client.set_model_version_tag(
-            name = latest.name,
-            version = latest.version,
-            # tags = TAGS
-            key = "promoted_by",
-            value = "stag_pipeline"
+    # client.set_model_version_tag(
+    #         name = latest.name,
+    #         version = latest.version,
+    #         # tags = TAGS
+    #         key = "promoted_by",
+    #         value = "stag_pipeline"
+    #     )
+
+    TAGS = {
+    "promoted_by": "stag_pipeline",
+    "f1_score": f"{round(best_score, 4)}"
+}
+
+    for key, value in TAGS.items():
+        client.set_model_version_tag(
+            name=latest.name,
+            version=latest.version,
+            key=key,
+            value=value
         )
+
 
 print("Staging evaluation passed")
 
