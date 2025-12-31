@@ -19,11 +19,11 @@ resources:
               env: stag
           compute: serverless
 
-        # - task_key: data_validation
-        #   depends_on:
-        #     - task_key: data_ingestion
-        #   notebook_task:
-        #     notebook_path: notebooks/00_data_validation.py
-        #     base_parameters:
-        #       env: dev
-        #   compute: serverless
+        - task_key: model_promote
+          depends_on:
+            - task_key: model_evaluation
+          notebook_task:
+            notebook_path: notebooks/06_model_promote.py
+            base_parameters:
+              env: stag
+          compute: serverless

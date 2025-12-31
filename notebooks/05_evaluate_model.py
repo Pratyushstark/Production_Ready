@@ -135,6 +135,7 @@ else:
 
 
 print("Staging evaluation passed")
+dbutils.jobs.taskValues.set(key="f1_score",value=f1_score)
 
 # # Promote to Staging
 # client.transition_model_version_stage(
