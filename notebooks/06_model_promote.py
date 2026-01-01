@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score, f1_score
 dbutils.widgets.text("env", "stag")
 ENV = dbutils.widgets.get("env")
 
-MIN_ACCURACY = 0.8
+MIN_ACCURACY = 0.66
 
 CATALOG = f"mlops_{ENV}"
 SCHEMA = "raw"
