@@ -47,4 +47,4 @@ jobs:
         run: databricks bundle run prod_batch_val -t prod
 
       - name: Deploy remaining model
-        run:  databricks budnle run prod_deploy_remaining -t prod 
+        run:  databricks bundle run prod_deploy_remaining -t prod 
