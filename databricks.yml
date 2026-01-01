@@ -10,7 +10,7 @@ resources:
   jobs:
 
     prod_deploy:
-      name: prod-model-deploy
+      name: 07_prod-model-deploy
       tasks:
         - task_key: deploy_model
           notebook_task:
@@ -20,7 +20,7 @@ resources:
           compute: serverless
 
     prod_batch_test:
-      name: prod-batch-inference-test
+      name: 08_prod-batch-inference-test
       tasks:
         - task_key: batch_test
           notebook_task:
@@ -31,7 +31,7 @@ resources:
           compute: serverless
 
     prod_batch_train:
-      name: prod-batch-inference-train
+      name: 08_prod-batch-inference-train
       tasks:
         - task_key: batch_train
           notebook_task:
@@ -42,7 +42,7 @@ resources:
           compute: serverless
 
     prod_batch_val:
-      name: prod-batch-inference-val
+      name: 08_prod-batch-inference-val
       tasks:
         - task_key: batch_val
           notebook_task:
@@ -53,7 +53,7 @@ resources:
           compute: serverless
 
     prod_deploy_remaining:
-      name: monitoring-stats
+      name: 09_monitoring-stats
       tasks:
         - task_key: monitoring_stats
           notebook_task:
