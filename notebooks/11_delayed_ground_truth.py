@@ -1,19 +1,89 @@
 # Databricks notebook source
-from pyspark.sql.functions import current_timestamp
+# from pyspark.sql.functions import current_timestamp
 
+# CATALOG = "mlops_prod"
+# SCHEMA = "raw"
+
+# preds = spark.table(f"{CATALOG}.{SCHEMA}.batch_predictions")
+
+# labels = spark.table(f"{CATALOG}.{SCHEMA}.test") \
+#     .select("Class")
+
+# joined = preds.withColumn("true_label", labels["Class"]) \
+#               .withColumn("label_time", current_timestamp())
+
+# joined.write.mode("overwrite").saveAsTable(
+#     f"{CATALOG}.{SCHEMA}.delayed_labels"
+# )
+
+# print("Delayed ground truth joined")
+
+from pyspark.sql.functions import sha2, concat_ws, col, current_timestamp
+
+# ----------------------------
+# Config
+# ----------------------------
 CATALOG = "mlops_prod"
 SCHEMA = "raw"
 
+ID_COLUMNS = [
+    "Time",
+    "Amount",
+    *[f"V{i}" for i in range(1, 29)]
+]
+
+# ----------------------------
+# Load tables
+# ----------------------------
 preds = spark.table(f"{CATALOG}.{SCHEMA}.batch_predictions")
+labels = spark.table(f"{CATALOG}.{SCHEMA}.test")
 
-labels = spark.table(f"{CATALOG}.{SCHEMA}.test") \
-    .select("Class")
+# ----------------------------
+# Create deterministic record_id
+# ----------------------------
+def add_record_id(df):
+    return df.withColumn(
+        "record_id",
+        sha2(concat_ws("||", *ID_COLUMNS), 256)
+    )
 
-joined = preds.withColumn("true_label", labels["Class"]) \
-              .withColumn("label_time", current_timestamp())
+preds = add_record_id(preds)
+labels = add_record_id(labels)
 
-joined.write.mode("overwrite").saveAsTable(
+# ----------------------------
+# Validate record_id
+# ----------------------------
+if preds.filter(col("record_id").isNull()).count() > 0:
+    raise ValueError("Null record_id found in batch_predictions")
+
+if labels.filter(col("record_id").isNull()).count() > 0:
+    raise ValueError("Null record_id found in test table")
+
+if preds.groupBy("record_id").count().filter("count > 1").count() > 0:
+    raise ValueError("Duplicate record_id found in batch_predictions")
+
+if labels.groupBy("record_id").count().filter("count > 1").count() > 0:
+    raise ValueError("Duplicate record_id found in test table")
+
+# ----------------------------
+# Join delayed ground truth
+# ----------------------------
+delayed_labels = (
+    preds.join(
+        labels.select("record_id", "Class"),
+        on="record_id",
+        how="left"
+    )
+    .withColumnRenamed("Class", "true_label")
+    .withColumn("label_time", current_timestamp())
+)
+
+# ----------------------------
+# Persist result
+# ----------------------------
+delayed_labels.write.mode("overwrite").saveAsTable(
     f"{CATALOG}.{SCHEMA}.delayed_labels"
 )
 
-print("Delayed ground truth joined")
+print("Delayed ground truth table created successfully")
+
