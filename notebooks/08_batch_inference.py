@@ -1,6 +1,7 @@
 # Databricks notebook source
 import mlflow
 from pyspark.sql.functions import struct, current_timestamp, lit
+from mlflow.tracking import MlflowClient
 
 dbutils.widgets.text("phase", "test")  # test | train | val
 PHASE = dbutils.widgets.get("phase")
@@ -9,6 +10,7 @@ CATALOG = "mlops_prod"
 SCHEMA = "raw"
 
 MODEL_NAME = "mlops_dev.raw.fraud_model"
+client = MlflowClient()
 
 INPUT_TABLE = f"{CATALOG}.{SCHEMA}.{PHASE}"
 OUTPUT_TABLE = f"{CATALOG}.{SCHEMA}.batch_predictions"
@@ -28,7 +30,7 @@ pred_df = (
     .withColumn("prediction", model_udf(struct(*feature_cols)))
     .withColumn("data_phase", lit(PHASE))
     .withColumn("model_version", lit(
-        mlflow.get_model_info(f"models:/{MODEL_NAME}@Champion").version
+        client.get_model_version_by_alias(MODEL_NAME, "Champion").version
     ))
     .withColumn("inference_time", current_timestamp())
 )
