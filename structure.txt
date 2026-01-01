@@ -1,0 +1,15 @@
+Folder PATH listing for volume New Volume
+Volume serial number is 32D8-B0FF
+D:.
+¦   databricks.yml
+¦   README.md
+¦   structure.txt
+¦   
++---.github
+¦   +---workflows
+¦           stag.yml
+¦           
++---notebooks
+        05_evaluate_model.py
+        06_model_promote.py
+        

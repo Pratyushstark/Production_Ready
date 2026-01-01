@@ -1,0 +1,93 @@
+bundle:
+  name: mlops-prod-bundle
+
+targets:
+  prod:
+    workspace:
+      host: https://dbc-292b7b7a-2dd0.cloud.databricks.com
+
+resources:
+  jobs:
+
+    prod_deploy:
+      name: prod-model-deploy
+      tasks:
+        - task_key: deploy_model
+          notebook_task:
+            notebook_path: notebooks/07_deployed_model.py
+            base_parameters:
+              env: prod
+          compute: serverless
+
+    prod_batch_test:
+      name: prod-batch-inference-test
+      tasks:
+        - task_key: batch_test
+          notebook_task:
+            notebook_path: notebooks/08_batch_inference.py
+            base_parameters:
+              env: prod
+              split: test
+          compute: serverless
+
+    prod_batch_train:
+      name: prod-batch-inference-train
+      tasks:
+        - task_key: batch_train
+          notebook_task:
+            notebook_path: notebooks/08_batch_inference.py
+            base_parameters:
+              env: prod
+              split: train
+          compute: serverless
+
+    prod_batch_val:
+      name: prod-batch-inference-val
+      tasks:
+        - task_key: batch_val
+          notebook_task:
+            notebook_path: notebooks/08_batch_inference.py
+            base_parameters:
+              env: prod
+              split: val
+          compute: serverless
+
+    prod_deploy_remaining:
+      name: monitoring-stats
+      tasks:
+        - task_key: monitoring_stats
+          notebook_task:
+            notebook_path: notebooks/09_monitoring_stats.py
+            base_parameters:
+              env: prod
+              compute: serverless
+
+        - task_key: drift_detection
+          notebook_task:
+            notebook_path: notebooks/10_drift_detection.py
+            base_parameters:
+              env: prod
+              compute: serverless
+        
+        - task_key: dealyed_ground_truth
+          notebook_task:
+            notebook_path: notebooks/11_dealyed_ground_truth.py
+            base_parameters:
+              env: prod
+              compute: serverless
+
+        - task_key: performance_evaluation
+          notebook_task:
+            notebook_path: notebooks/12_performance_evaluation.py
+            base_parameters:
+              env: prod
+              compute: serverless
+
+        - task_key: rollback
+          notebook_task:
+            notebook_path: notebooks/13_rollback.py
+            base_parameters:
+              env: prod
+              compute: serverless
+
+
