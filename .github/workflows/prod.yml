@@ -1,7 +1,9 @@
 name: Prod Pipeline
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ prod ]
+  # workflow_dispatch:
 
 jobs:
   prod:
