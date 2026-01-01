@@ -109,7 +109,14 @@ preds = spark.table(f"{CATALOG}.{SCHEMA}.batch_predictions")
 labels = spark.table(f"{CATALOG}.{SCHEMA}.test")
 
 # ----------------------------
-# Base hash (feature identity)
+# CLEANUP: remove any label leakage
+# ----------------------------
+for c in ["Class", "true_label"]:
+    if c in preds.columns:
+        preds = preds.drop(c)
+
+# ----------------------------
+# Base hash
 # ----------------------------
 def add_base_hash(df):
     return df.withColumn(
@@ -121,24 +128,18 @@ preds = add_base_hash(preds)
 labels = add_base_hash(labels)
 
 # ----------------------------
-# Disambiguate duplicates safely
+# Disambiguate duplicates
 # ----------------------------
 window = Window.partitionBy("base_hash").orderBy("base_hash")
 
 preds = preds.withColumn(
     "record_id",
-    sha2(
-        concat_ws("||", col("base_hash"), row_number().over(window)),
-        256
-    )
+    sha2(concat_ws("||", col("base_hash"), row_number().over(window)), 256)
 )
 
 labels = labels.withColumn(
     "record_id",
-    sha2(
-        concat_ws("||", col("base_hash"), row_number().over(window)),
-        256
-    )
+    sha2(concat_ws("||", col("base_hash"), row_number().over(window)), 256)
 )
 
 # ----------------------------
@@ -162,4 +163,5 @@ delayed_labels.write.mode("overwrite").saveAsTable(
 )
 
 print("Delayed ground truth table created successfully")
+
 
