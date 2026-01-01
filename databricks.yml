@@ -71,7 +71,7 @@ resources:
         
         - task_key: dealyed_ground_truth
           notebook_task:
-            notebook_path: notebooks/11_dealyed_ground_truth.py
+            notebook_path: notebooks/11_delayed_ground_truth.py
             base_parameters:
               env: prod
               compute: serverless
