@@ -7,6 +7,7 @@ CATALOG = "mlops_prod"
 SCHEMA = "raw"
 
 preds = spark.table(f"{CATALOG}.{SCHEMA}.batch_predictions")
+preds = preds.drop("Class")
 
 labels_test = spark.table(f"{CATALOG}.{SCHEMA}.test") \
     .select("Class")
