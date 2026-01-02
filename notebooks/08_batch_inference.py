@@ -32,7 +32,7 @@ feature_cols = [c for c in df.columns if c != "Class"]
 pred_df = (
     df
     .withColumn("prediction", model_udf(struct(*feature_cols)))
-    .withColumn("data_phase", "All")
+    .withColumn("data_phase", lit("All"))
     .withColumn("model_version", lit(
         client.get_model_version_by_alias(MODEL_NAME, "Champion").version
     ))
