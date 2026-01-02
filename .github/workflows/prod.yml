@@ -31,20 +31,20 @@ jobs:
       - name: Deploy Model
         run: databricks bundle run prod_deploy -t prod
 
-      - name: Batch Inference (test)
-        run: databricks bundle run prod_batch_test -t prod
+      # - name: Batch Inference (test)
+      #   run: databricks bundle run prod_batch_test -t prod
 
-      - name: Wait 1 minutes
-        run:  sleep 60
+      # - name: Wait 1 minutes
+      #   run:  sleep 60
 
-      - name: Batch Inference (train)
-        run: databricks bundle run prod_batch_train -t prod
+      # - name: Batch Inference (train)
+      #   run: databricks bundle run prod_batch_train -t prod
       
-      - name: Wait 1 minutes
-        run:  sleep 60
+      # - name: Wait 1 minutes
+      #   run:  sleep 60
 
-      - name: Batch Inference (val)
-        run: databricks bundle run prod_batch_val -t prod
+      # - name: Batch Inference (val)
+      #   run: databricks bundle run prod_batch_val -t prod
 
-      - name: Deploy remaining model
-        run:  databricks bundle run prod_deploy_remaining -t prod 
+      # - name: Deploy remaining model
+      #   run:  databricks bundle run prod_deploy_remaining -t prod 
