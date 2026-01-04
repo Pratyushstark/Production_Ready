@@ -46,7 +46,7 @@
 # notebooks/08_batch_inference.py
 
 import mlflow
-from pyspark.sql.functions import struct, current_timestamp
+from pyspark.sql.functions import struct, current_timestamp, lit
 from mlflow.tracking import MlflowClient
 
 CATALOG = "mlops_prod"
@@ -93,7 +93,7 @@ predictions = (
     .withColumn("prediction", model_udf(struct(*feature_cols)))
     .withColumn(
         "model_version",
-        mlflow.get_model_version_by_alias(MODEL_NAME, "Champion").version
+        lit(client.get_model_version_by_alias(MODEL_NAME, "Champion").version)
     )
     .withColumn("inference_time", current_timestamp())
     .select("request_id", "prediction", "model_version", "inference_time")
@@ -102,4 +102,3 @@ predictions = (
 predictions.write.mode("append").format("delta").saveAsTable(PRED_TABLE)
 
 print(f"Scored {predictions.count()} rows")
-

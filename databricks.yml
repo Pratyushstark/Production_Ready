@@ -24,12 +24,12 @@ resources:
 
 
     # ---------------------------------------------------
-    # 2. BATCH INFERENCE JOB (EVERY 5 MINUTES)
+    # 2. BATCH INFERENCE JOB (EVERY 2 MINUTES)
     # ---------------------------------------------------
     batch_inference_job:
       name: prod-batch-inference
       schedule:
-        quartz_cron_expression: "0 */5 * * * ?"
+        quartz_cron_expression: "0 */2 * * * ?"
         timezone_id: "UTC"
       tasks:
         - task_key: batch_inference
