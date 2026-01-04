@@ -1,3 +1,96 @@
+# bundle:
+#   name: mlops-prod-bundle
+
+# targets:
+#   prod:
+#     workspace:
+#       host: https://dbc-292b7b7a-2dd0.cloud.databricks.com
+
+# resources:
+#   jobs:
+
+#     # ---------------------------------------------------
+#     # 1. PROD DEPLOYMENT JOB (CI/CD TRIGGERED)
+#     # ---------------------------------------------------
+#     prod_deploy:
+#       name: prod-model-deploy
+#       tasks:
+#         - task_key: deploy_model
+#           notebook_task:
+#             notebook_path: notebooks/07_deployed_model.py
+#             base_parameters:
+#               env: prod
+#           compute: serverless
+
+
+#     # ---------------------------------------------------
+#     # 2. BATCH INFERENCE JOB (EVERY 2 MINUTES)
+#     # ---------------------------------------------------
+#     batch_inference_job:
+#       name: prod-batch-inference
+#       schedule:
+#         quartz_cron_expression: "0 */2 * * * ?"
+#         timezone_id: "UTC"
+#       tasks:
+#         - task_key: batch_inference
+#           notebook_task:
+#             notebook_path: notebooks/08_batch_inference.py
+#             base_parameters:
+#               env: prod
+#           compute: serverless
+
+
+#     # ---------------------------------------------------
+#     # 3. MONITORING + DRIFT + ROLLBACK PIPELINE
+#     # ---------------------------------------------------
+#     monitoring_pipeline:
+#       name: prod-monitoring-pipeline
+#       tasks:
+#         - task_key: monitoring_stats
+#           notebook_task:
+#             notebook_path: notebooks/09_monitoring_stats.py
+#             base_parameters:
+#               env: prod
+#           compute: serverless
+
+#         - task_key: drift_detection
+#           depends_on:
+#             - task_key: monitoring_stats
+#           notebook_task:
+#             notebook_path: notebooks/10_drift_detection.py
+#             base_parameters:
+#               env: prod
+#           compute: serverless
+
+#         - task_key: delayed_ground_truth
+#           depends_on:
+#             - task_key: drift_detection
+#           notebook_task:
+#             notebook_path: notebooks/11_delayed_ground_truth.py
+#             base_parameters:
+#               env: prod
+#           compute: serverless
+
+#         - task_key: performance_evaluation
+#           depends_on:
+#             - task_key: delayed_ground_truth
+#           notebook_task:
+#             notebook_path: notebooks/12_performance_evaluation.py
+#             base_parameters:
+#               env: prod
+#           compute: serverless
+
+#         - task_key: rollback
+#           depends_on:
+#             - task_key: performance_evaluation
+#           notebook_task:
+#             notebook_path: notebooks/13_rollback.py
+#             base_parameters:
+#               env: prod
+#           compute: serverless
+
+
+
 bundle:
   name: mlops-prod-bundle
 
@@ -9,9 +102,9 @@ targets:
 resources:
   jobs:
 
-    # ---------------------------------------------------
-    # 1. PROD DEPLOYMENT JOB (CI/CD TRIGGERED)
-    # ---------------------------------------------------
+    # -----------------------------
+    # 1. MODEL DEPLOYMENT
+    # -----------------------------
     prod_deploy:
       name: prod-model-deploy
       tasks:
@@ -22,10 +115,9 @@ resources:
               env: prod
           compute: serverless
 
-
-    # ---------------------------------------------------
-    # 2. BATCH INFERENCE JOB (EVERY 2 MINUTES)
-    # ---------------------------------------------------
+    # -----------------------------
+    # 2. BATCH INFERENCE (2 MIN)
+    # -----------------------------
     batch_inference_job:
       name: prod-batch-inference
       schedule:
@@ -39,54 +131,18 @@ resources:
               env: prod
           compute: serverless
 
-
-    # ---------------------------------------------------
-    # 3. MONITORING + DRIFT + ROLLBACK PIPELINE
-    # ---------------------------------------------------
-    monitoring_pipeline:
-      name: prod-monitoring-pipeline
+    # -----------------------------
+    # 3. MONITORING (1 MIN)
+    # -----------------------------
+    monitoring_job:
+      name: prod-model-monitoring
+      schedule:
+        quartz_cron_expression: "0 */1 * * * ?"
+        timezone_id: "UTC"
       tasks:
-        - task_key: monitoring_stats
+        - task_key: monitoring
           notebook_task:
-            notebook_path: notebooks/09_monitoring_stats.py
+            notebook_path: notebooks/09a_monitoring_stats.py
             base_parameters:
               env: prod
           compute: serverless
-
-        - task_key: drift_detection
-          depends_on:
-            - task_key: monitoring_stats
-          notebook_task:
-            notebook_path: notebooks/10_drift_detection.py
-            base_parameters:
-              env: prod
-          compute: serverless
-
-        - task_key: delayed_ground_truth
-          depends_on:
-            - task_key: drift_detection
-          notebook_task:
-            notebook_path: notebooks/11_delayed_ground_truth.py
-            base_parameters:
-              env: prod
-          compute: serverless
-
-        - task_key: performance_evaluation
-          depends_on:
-            - task_key: delayed_ground_truth
-          notebook_task:
-            notebook_path: notebooks/12_performance_evaluation.py
-            base_parameters:
-              env: prod
-          compute: serverless
-
-        - task_key: rollback
-          depends_on:
-            - task_key: performance_evaluation
-          notebook_task:
-            notebook_path: notebooks/13_rollback.py
-            base_parameters:
-              env: prod
-          compute: serverless
-
-
